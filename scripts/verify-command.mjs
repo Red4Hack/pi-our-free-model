@@ -12,7 +12,7 @@ import { pathToFileURL } from 'node:url'
 
 const target = process.argv[2]
 if (!target) {
-  console.error('usage: node verify-command.mjs <path/to/extensions/index.js>')
+  console.error('usage: node verify-command.mjs <path/to/extensions/index.ts>')
   process.exit(1)
 }
 

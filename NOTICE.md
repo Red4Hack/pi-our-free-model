@@ -28,20 +28,10 @@ package runs that gateway and registers it as a pi provider.
 
 ## How the gateway code reaches this package
 
-`bundled/` holds one **pinned** snapshot of the upstream standalone closure:
-
-- `bundled/manifest.json` — the revision, its per-file size and sha256, and the
-  UTC time the snapshot was built.
-- `bundled/**` — the byte-for-byte tree for that revision.
-
-Updating is `node scripts/bump-pin.mjs <revision>` (or `--latest`), which
-regenerates both artifacts from a fresh upstream checkout. The pin is reviewed
-before it is written: see "Reviewing a pin" in README.md.
-
-Nothing here relicenses or rewrites upstream. The files under `bundled/` are
-unmodified upstream sources and remain under the upstream MIT license with their
-original copyright notices. Third-party notices for the vendored channel pack
-are preserved at `bundled/vendor/channel-pack/NOTICE.md`.
+`pin.json` names one upstream revision. The gateway code is downloaded from
+upstream for that revision on first launch and cached; nothing is vendored here.
+It stays unmodified upstream source under the upstream MIT license and original
+copyright notices.
 
 ## What this package adds
 

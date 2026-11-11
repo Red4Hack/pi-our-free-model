@@ -100,8 +100,8 @@ and stored in `<data dir>/settings.json` as `forwardKey`.
 
 ```
 pi process
-  └── extensions/index.js            (this package)
-        ├── resolveRuntime()         pin → cached snapshot, else the bundled tree
+  └── extensions/index.ts            (this package)
+        ├── resolveRuntime()         pin → cached snapshot, else download it
         ├── ensureService()          spawn / adopt the gateway (detached, 127.0.0.1)
         ├── GET /v1/models ─────────► live model list
         ├── read catalog.json ──────► context window, max output, reasoning, vision
@@ -109,9 +109,10 @@ pi process
 ```
 
 The gateway code itself is a pinned snapshot of upstream's standalone service,
-staged under `~/.our-free-model/runtimes/snapshots/<revision>/`. The npm package
-ships that snapshot too, under `bundled/`, so the first launch works with no
-network at all.
+staged under `~/.our-free-model/runtimes/snapshots/<revision>/`. On first launch it is downloaded for the revision in `pin.json`
+(network required once); a daily background check can stage newer commits.
+Disable with `PI_OUR_FREE_MODEL_AUTOUPDATE=0`. Messages are English; set
+`PI_OUR_FREE_MODEL_LANG=zh` for Chinese.
 
 Two compatibility flags are required by this gateway and are set automatically:
 
@@ -120,7 +121,7 @@ Two compatibility flags are required by this gateway and are set automatically:
 
 ## Updating
 
-The gateway is pinned to one upstream revision. `bundled/manifest.json` is the
+The gateway is pinned to one upstream revision. `pin.json` is the
 only file that records it, so moving forward is a single-artifact change:
 
 ```bash
@@ -128,11 +129,11 @@ only file that records it, so moving forward is a single-artifact change:
 npm run pin:check                      # is the pin behind upstream?
 node scripts/bump-pin.mjs --latest     # or: <specific 40-character sha>
 npm test                               # bytes, closure, a real boot, the command surface
-git add bundled && git commit -m "pin: upstream <revision>"
+git add pin.json && git commit -m "pin: upstream <revision>"
 pi update git:github.com/Twofruitsgrape/pi-our-free-model
 ```
 
-`npm test` is not a lint pass. `verify-bundled.mjs` starts the pinned gateway on
+`npm test` is not a lint pass. `npm test` starts the pinned gateway on
 an ephemeral port in a throwaway data directory, waits for `/health`, lists
 `/v1/models`, and asks the management console for a real bundle — then shuts it
 down. `verify-command.mjs` then registers `/free-models` against a stub and calls
@@ -154,7 +155,7 @@ manifest is rewritten:
 ```bash
 node scripts/bump-pin.mjs <revision>
 git -C .upstream log -1 --stat      # what is actually in this revision
-node scripts/verify-bundled.mjs    # does it boot
+npm test                           # does it work
 ```
 
 `bump-pin.mjs` materializes the tree **before** writing the manifest, so a bad

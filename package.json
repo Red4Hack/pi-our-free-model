@@ -22,7 +22,8 @@
   },
   "files": [
     "extensions",
-    "bundled",
+    "src",
+    "pin.json",
     "README.md",
     "LICENSE",
     "NOTICE.md"
@@ -42,9 +43,8 @@
     "pin:check": "node scripts/bump-pin.mjs --check",
     "pin:latest": "node scripts/bump-pin.mjs --latest",
     "pin:current": "node scripts/bump-pin.mjs --current",
-    "verify": "npm run verify:bundled && npm run verify:command",
+    "verify": "npm run verify:command",
     "test": "npm run verify",
-    "verify:bundled": "node scripts/verify-bundled.mjs",
-    "verify:command": "node scripts/verify-command.mjs ./extensions/index.js"
+    "verify:command": "node scripts/verify-command.mjs ./extensions/index.ts"
   }
 }

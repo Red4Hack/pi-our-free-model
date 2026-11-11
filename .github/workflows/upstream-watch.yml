@@ -33,7 +33,7 @@ jobs:
       - name: Read the current pin
         id: pin
         run: |
-          PIN=$(node -e "process.stdout.write(require('./bundled/manifest.json').revision ?? '')")
+          PIN=$(node -e "process.stdout.write(require('./pin.json').revision ?? '')")
           echo "pin=$PIN" >> "$GITHUB_OUTPUT"
           echo "current pin: ${PIN:-<none>}"
 
@@ -68,17 +68,17 @@ jobs:
           gh issue create \
             --title "$TITLE" \
             --body "$(cat <<EOF
-          The bundled pin is \`${PIN}\`; upstream \`main\` is at \`${LATEST}\`.
+          The pin is \`${PIN}\`; upstream \`main\` is at \`${LATEST}\`.
 
           Review and adopt with:
 
           \`\`\`bash
           node scripts/bump-pin.mjs ${LATEST}      # clones upstream, stages this revision
-          node scripts/verify-bundled.mjs          # bytes, closure, and a real gateway boot
+          npm test
           git -C .upstream log -1 ${LATEST} --stat # read what is actually in it
           \`\`\`
 
-          \`verify-bundled.mjs\` starts the pinned gateway on an ephemeral port,
+          `npm test` starts the pinned gateway on an ephemeral port,
           waits for \`/health\`, lists \`/v1/models\` and asks the console for a
           real bundle. A pin that cannot boot does not get committed.
           EOF
