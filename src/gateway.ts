@@ -240,8 +240,9 @@ export async function waitForFullCatalog(service, { attempts = 15, delayMs = 100
   for (let attempt = 0; attempt < attempts; attempt++) {
     const found = await discoverModels(service, 20_000)
     if (found && found.length > 0) {
+      // A count that did not grow since the last poll means the channels have reported in.
+      if (found.length > 100 || found.length === best?.length) return found
       best = found
-      if (found.length > 100) return found
     }
     if (attempt < attempts - 1) await new Promise((resolve) => setTimeout(resolve, delayMs))
   }
