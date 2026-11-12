@@ -74,11 +74,15 @@ async function probeHealth(url, timeoutMs = 1500) {
   }
 }
 
-function findFreePort() {
+/** Fixed port: below Linux's ephemeral range (32768+) and unassigned, so nothing grabs it by chance. Override with PI_OUR_FREE_MODEL_PORT. */
+const FIXED_PORT = Number(process.env.PI_OUR_FREE_MODEL_PORT) || 29517
+
+// A fixed port keeps the URL stable across restarts; fall back to a random one only if something else holds it.
+function findFreePort(preferred = 0) {
   return new Promise((resolve, reject) => {
     const server = net.createServer()
-    server.once('error', reject)
-    server.listen(0, '127.0.0.1', () => {
+    server.once('error', () => (preferred ? resolve(findFreePort()) : reject(new Error('no free port'))))
+    server.listen(preferred, '127.0.0.1', () => {
       const port = server.address()?.port
       server.close(() => (port ? resolve(port) : reject(new Error('no free port'))))
     })
@@ -130,7 +134,7 @@ export function ensureService({ cliEntry, dataDir, logger }) {
       }
     }
 
-    const port = await findFreePort()
+    const port = await findFreePort(FIXED_PORT)
     const url = 'http://127.0.0.1:' + port
 
     // cwd is the gateway's own directory, not the package root: spawning inside
